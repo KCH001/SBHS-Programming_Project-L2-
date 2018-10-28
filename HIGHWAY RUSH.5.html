@@ -1,0 +1,525 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Highway Rush</title>
+    <style>
+        @font-face {
+            font-family: hitroad;
+            src: url('/Fonts/hitroad.ttf');
+        }
+        @font-face {
+            font-family: ROADWAY;
+            src: url('/Fonts/ROADWAY.ttf');
+        }
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            background: black;
+            display: flex;
+
+        }
+        
+        section: {
+            display: flex;   
+            flex-wrap: wrap;
+        }
+        
+        header {
+            color: white;
+            margin: 10%, auto, 10, 10%;
+            height: 20%;
+            width: 33.3%;
+            text-align: center;
+        }
+        
+        h1{
+            font-weight: bold;
+            font-family: ROADWAY;
+            font-size: 6em;
+            margin-top: 2%;
+            margin-bottom: auto;
+        }
+        
+        h2{
+            font-family: ROADWAY;
+            font-size: 3em;
+        }
+        
+        a{
+            text-decoration: none;
+            align-items: flex-start;
+            text-align: center;
+            cursor: pointer;
+            color: buttontext;
+            background-color: buttonface;
+            box-sizing: border-box;
+            padding: 2px 6px 3px;
+            border-width: 2px;
+            border-style: outset;
+            border-color: buttonface;
+            border-image: initial;
+            margin: 5%;
+        }
+
+        div, .inst{
+            margin: 1%;
+            padding: 2%;
+            border: 2px solid white;
+            background-color: darkgray;
+            font-family: hitroad;
+        }
+        
+        p {
+            margin: 1%;
+            font-size: 1.5em;
+            font-family: hitroad;
+        }
+        
+        
+        img, .keys{
+            height: auto;
+            width: 25%;
+            display: inline-block;
+        }
+        
+        img, ocars{
+            height: auto;
+            width: 10%;
+            display: inline-block;
+        }
+        
+        canvas {
+            border: 1px solid white;
+            height: 100%;
+            width: auto;
+        }
+    </style>
+
+    <link rel="shortcut icon" href="Images/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="Images/favicon.ico" type="image/x-icon">
+
+</head>
+
+<body>
+
+    <header>
+        <h1><b>Highway Rush</b></h1>
+        <hr>
+        <a href="javascript:history.go(0)">Restart</a>
+        <hr>
+        <h2>INstRUCTIONS</h2>
+        <div class="inst">
+            <p>Use The Arrow Keys OR Use The WASD Keys To Control The Car.</p>
+            <br>
+            <img class="keys" src="Images/arrowkeys1.png" alt="Use The Arrow Keys To Control The Car">
+            <img class="keys" src="Images/wasdkeys1.png" alt="Use The WASD Keys To Control The Car">
+            <br>
+            <p>While Avoiding Oncoming Cars From The Top Of The Screen.</p>
+            <br>
+            <img class="ocars" src="Images/Car-PNG/Car-2.png">
+            <img class="ocars" src="Images/Car-PNG/Car-3.png">
+            <img class="ocars" src="Images/Car-PNG/Car-4.png">
+        </div>
+    </header>
+
+    <canvas width="500" height="800" id="gameCanvas"></canvas>
+    <script>
+        var canvas, canvasContext, assestLoad;
+        var gameSpeed = 0;
+
+        var difficulty = prompt('What difficulty setting do you want to play? Easy, Medium, Hard or Death?', 'Easy' /*, 'Medium', 'Hard', 'Death'*/ )
+
+        if (difficulty == 'Death') {
+            gameSpeed = 100;
+        }
+        if (difficulty != 'Death')
+            gameSpeed = 50;
+
+        if (difficulty == 'Hard') {
+            gameSpeed = 80;
+        }
+        if (difficulty != 'Hard')
+            gameSpeed = 50;
+
+        if (difficulty == 'Medium') {
+            gameSpeed = 75;
+        }
+        if (difficulty != 'Medium')
+            gameSpeed = 50;
+
+        if (difficulty == 'Easy') {
+            gameSpeed = 50;
+        }
+        if (difficulty != 'Easy')
+            gameSpeed = 50;
+
+
+        window.onload = function() {
+            canvas = document.getElementById('gameCanvas');
+            canvasContext = canvas.getContext('2d');
+
+            document.addEventListener('keydown', keyPressed); //keyPressed = made function 
+            document.addEventListener('keyup', keyReleased); //keyReleased = made function 
+            //      document.addEventListener('keyup', function(e) {
+            // if (e.keyCode == 82)
+            // window.location.reload();
+            // })
+
+            for (i = 0; i < CarTotal; i++) {
+                cars.push(MakeTraffic());
+                console.log('running')
+            }
+
+            assestLoad = loadImgAssests();
+
+            setInterval(mainLoop, 1000 / gameSpeed);
+        }
+        var setUp = true;
+        var gameRun = true;
+
+        var carXpos = 0;
+        var carYpos = 330;
+        var carXspeed = 8;
+        var carXspeed = 8;
+        var carYspeed = 10;
+        const CAR_WIDTH = 60;
+        const CAR_HEIGHT = 100;
+
+        const LEFT_ARROW = 37;
+        const UP_ARROW = 38;
+        const RIGHT_ARROW = 39;
+        const DOWN_ARROW = 40;
+        var leftPressed = false;
+        var upPressed = false;
+        var rightPressed = false;
+        var downPressed = false;
+
+        const A_KEY = 65;
+        const W_KEY = 87;
+        const D_KEY = 68;
+        const S_KEY = 83;
+        const REFRESH = 82;
+        var rKeyPressed = false;
+        var aKeyPressed = false;
+        var wKeyPressed = false;
+        var dKeyPressed = false;
+        var sKeyPressed = false;
+
+        var PlineXpos = 0;
+        var PlineYpos = 0;
+        const PLINE_HEIGHT = 800;
+        const PLINE_WIDTH = 30;
+
+
+        var centerLines = [];
+        var lineCount = 0;
+        var lineTotal = 10;
+        var lanes = 4;
+
+        var cars = [];
+        var CarCount = 0;
+        var CarTotal = 4;
+        var Carlanes = 4;
+
+        var laneNo = 0;
+
+
+
+
+        function mainLoop() {
+            if (gameRun) {
+                colorRect(0, 0, canvas.width, canvas.height, 'grey') // bg
+                //            colorRect(carXpos, carYpos, CAR_WIDTH, CAR_HEIGHT, 'blue') //car
+
+                canvasImage(img.road, 0, 0, canvas.width, canvas.height);
+                lineRender();
+                canvasImage(img.car, carXpos, carYpos, CAR_WIDTH, CAR_HEIGHT);
+                canvasImage(img.line, 460, PlineYpos, PLINE_WIDTH, PLINE_HEIGHT);
+
+                if (setUp) {
+                    settingUp();
+                    setUp = false;
+                }
+                carMove();
+                TrafficRender();
+            }
+        }
+
+
+
+        function keyPressed(evt) {
+            console.log(evt.keyCode)
+
+            if (evt.keyCode == REFRESH) {
+                window.location.reload();
+            }
+
+            //Key Press With Arrow Keys
+            //Left Arrow
+            if (evt.keyCode == LEFT_ARROW) {
+                leftPressed = true;
+            }
+
+            //Up Arrow
+            if (evt.keyCode == UP_ARROW) {
+                upPressed = true;
+            }
+
+            //Right Arrow
+            if (evt.keyCode == RIGHT_ARROW) {
+                rightPressed = true;
+            }
+
+            //Down Arrow
+            if (evt.keyCode == DOWN_ARROW) {
+                downPressed = true;
+            }
+
+
+            //Key Press With WASD
+            //A_KEY
+            if (evt.keyCode == A_KEY) {
+                aKeyPressed = true;
+            }
+
+            //W_KEY
+            if (evt.keyCode == W_KEY) {
+                wKeyPressed = true;
+            }
+
+            //D_KEY
+            if (evt.keyCode == D_KEY) {
+                dKeyPressed = true;
+            }
+
+            //S_KEY
+            if (evt.keyCode == S_KEY) {
+                sKeyPressed = true;
+            }
+
+        }
+
+
+        function keyReleased(evt) {
+
+            //Key Press With Arrow Keys
+            //Left Arrow
+            if (evt.keyCode == LEFT_ARROW) {
+                leftPressed = false;
+            }
+
+            //Up Arrow
+            if (evt.keyCode == UP_ARROW) {
+                upPressed = false;
+            }
+
+            //Right Arrow
+            if (evt.keyCode == RIGHT_ARROW) {
+                rightPressed = false;
+            }
+
+            //Down Arrow
+            if (evt.keyCode == DOWN_ARROW) {
+                downPressed = false;
+            }
+
+            //Key Press With WASD
+            //A_KEY
+            if (evt.keyCode == A_KEY) {
+                aKeyPressed = false;
+            }
+
+            //W_KEY
+            if (evt.keyCode == W_KEY) {
+                wKeyPressed = false;
+            }
+
+            //D_KEY
+            if (evt.keyCode == D_KEY) {
+                dKeyPressed = false;
+            }
+
+            //S_KEY
+            if (evt.keyCode == S_KEY) {
+                sKeyPressed = false;
+            }
+        }
+
+
+        //Centreline 1
+        function makeCenterLine() {
+            var grassGap = 83;
+            const LINE_WIDTH = 5;
+            const LINE_HEIGHT = 50;
+            const LINE_GAP = 55;
+            const X_POS = grassGap * (lineCount % 5 + 1);
+            var yPos = (lineCount % 8) * (LINE_HEIGHT + LINE_GAP);
+
+            var ySpeed = 5;
+            lineCount++;
+
+            var centerLineObject = {
+                X_POS: X_POS,
+                yPos: yPos,
+                LINE_WIDTH: LINE_WIDTH,
+                LINE_HEIGHT: LINE_HEIGHT,
+                ySpeed: ySpeed
+            }
+            return centerLineObject;
+        }
+
+
+
+
+        function lineRender() {
+            centerLines.forEach(function(line, index) {
+                colorRect(line.X_POS, line.yPos, line.LINE_WIDTH, line.LINE_HEIGHT, 'white');
+                line.yPos += line.ySpeed;
+                if (line.yPos > canvas.height) {
+                    line.yPos = 0 - line.LINE_HEIGHT;
+                }
+            });
+        }
+
+
+        function MakeTraffic() {
+
+            var grassGap = 83;
+            const CARS_WIDTH = 60;
+            const CARS_HEIGHT = 100;
+            const LINE_GAP = 55;
+            //            var carXpos = Math.floor(Math.random() * ((canvas.width - grassGap) - grassGap) + grassGap);
+            var carXpos = 0;
+
+            switch (laneNo) {
+                case 0:
+                    carXpos = canvas.width * 0.20;
+                    break;
+                case 1:
+                    carXpos = canvas.width * 0.37;
+                    break;
+                case 2:
+                    carXpos = canvas.width * 0.54;
+                    break;
+                case 3:
+                    carXpos = canvas.width * 0.70;
+                    break;
+            }
+            laneNo++;
+            var CarsyPos = 0 - Math.floor(Math.random() * (60 - 5) + 5) - CARS_HEIGHT;
+
+            var CarsySpeed = Math.floor(Math.random() * (10 - 2) + 2);
+
+            var Traffic = {
+                CARS_WIDTH: CARS_WIDTH,
+                CARS_HEIGHT: CARS_HEIGHT,
+                carXpos: carXpos,
+                CarsyPos: CarsyPos,
+                CarsySpeed: CarsySpeed
+            }
+            return Traffic;
+        }
+
+
+
+
+        function TrafficRender() {
+            cars.forEach(function(car, index) {
+                canvasImage(img.car, car.carXpos, car.CarsyPos, car.CARS_WIDTH, car.CARS_HEIGHT);
+
+                car.CarsyPos += car.CarsySpeed;
+
+                if (car.CarsyPos > canvas.height) {
+                    car.CarsyPos = 0 - Math.floor(Math.random() * (60 - 5) + 5) - car.CARS_HEIGHT;
+                    car.CarsySpeed = Math.floor(Math.random() * (10 - 2) + 2);
+                }
+            });
+        }
+
+
+
+
+        function carMove() {
+
+
+            cars.forEach(function(cars, index) {
+                if (cars.CarsyPos > carYpos - cars.CARS_WIDTH && cars.CarsyPos < carYpos + CAR_HEIGHT && cars.carXpos > carXpos - cars.CARS_HEIGHT && cars.CarsyPos < carXpos + CAR_WIDTH) {
+                    gameRun = false;
+                }
+
+                if (leftPressed || aKeyPressed) {
+                    carXpos -= carXspeed;
+                    if (carXpos < 0) {
+                        carXpos += carXspeed
+                    }
+                }
+
+                if (upPressed || wKeyPressed) {
+                    carYpos -= carYspeed;
+                    if (carYpos < 0) {
+                        carYpos += carYspeed
+                    }
+                }
+
+                if (rightPressed || dKeyPressed) {
+                    carXpos += carXspeed;
+                    if (carXpos > canvas.width - CAR_WIDTH) {
+                        carXpos -= carXspeed
+                    }
+                }
+
+                if (downPressed || sKeyPressed) {
+                    carYpos += carYspeed;
+                    if (carYpos > canvas.height - CAR_HEIGHT) {
+                        carYpos -= carYspeed
+                    }
+                }
+
+            });
+        }
+
+        function settingUp() {
+            carXpos = 103;
+            carYpos = (canvas.height - CAR_HEIGHT);
+            for (i = 0; i < lineTotal * lanes; i++) {
+                centerLines.push(makeCenterLine());
+            }
+            PlineXpos = 350;
+            PlineYpos = 0;
+        }
+
+        function colorRect(x, y, w, h, color) {
+            canvasContext.fillStyle = color; // adds color to rect
+            canvasContext.fillRect(x, y, w, h);
+        }
+
+        function loadImgAssests() {
+
+            img = {}; // making an img object 
+            img.road = new Image(); // creating an new player object that is an image 
+            img.road.src = 'Images/Car-PNG/Road.png' // locates the images
+
+            img.car = new Image(); // creating an new player object that is an image 
+            img.car.src = 'Images/Car-PNG/Car-1.png' // locates the images\
+
+            img.line = new Image(); // creating an new player object that is an image 
+            img.line.src = 'Images/Powerlineline.png' // locates the images
+
+            return img; // makes the img object to be useable to draw an image 
+
+        }
+
+        function canvasImage(image, dx, dy, dWidth, dHeight) {
+            canvasContext.drawImage(image, dx, dy, dWidth, dHeight);
+
+
+        }
+    </script>
+</body>
+
+</html>
